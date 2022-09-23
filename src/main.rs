@@ -1,10 +1,28 @@
-use std::collections::HashMap;
+use std::str::FromStr;
+use std::{collections::HashMap, io::Read};
 
 struct Todo {
     map: HashMap<String, bool>,
 }
 
 impl Todo {
+    fn new() -> Result<Todo, std::io::Error> {
+        let mut f = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .read(true)
+            .open("db.txt")?;
+        let mut content = String::new();
+        f.read_to_string(&mut content)?;
+        let map: HashMap<String, bool> = content
+            .lines()
+            .map(|line| line.splitn(2, '\t').collect::<Vec<&str>>())
+            .map(|v| (v[0], v[1]))
+            .map(|(k, v)| (String::from(k), bool::from_str(v).unwrap()))
+            .collect();
+        Ok(Todo { map })
+    }
+
     fn insert(&mut self, key: String) {
         self.map.insert(key, true);
     }
