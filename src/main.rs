@@ -14,12 +14,17 @@ impl Todo {
             .open("db.txt")?;
         let mut content = String::new();
         f.read_to_string(&mut content)?;
-        let map: HashMap<String, bool> = content
-            .lines()
-            .map(|line| line.splitn(2, '\t').collect::<Vec<&str>>())
-            .map(|v| (v[0], v[1]))
-            .map(|(k, v)| (String::from(k), bool::from_str(v).unwrap()))
-            .collect();
+
+        let mut map = HashMap::new();
+
+        for entries in content.lines() {
+            let mut values = entries.split('\t');
+            let key = values.next().expect("No Key");
+            let val = values.next().expect("No Value");
+
+            map.insert(String::from(key), bool::from_str(val).unwrap());
+        }
+
         Ok(Todo { map })
     }
 
